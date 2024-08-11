@@ -1,0 +1,60 @@
+<div class="container">
+  <header>
+    <h1>Dokumenty</h1>
+    <nav>
+      <ul>
+        <li [ngClass]="{ active: currentTab === 'list' }" (click)="setTab('list')">Lista Dokumentów</li>
+        <li [ngClass]="{ active: currentTab === 'create' }" (click)="setTab('create')">Tworzenie Dokumentu</li>
+        <li [ngClass]="{ active: currentTab === 'view' }" (click)="setTab('view')">Podgląd Dokumentu</li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div *ngIf="currentTab === 'list'">
+      <h2>Lista Dokumentów</h2>
+      <ul>
+        <li *ngFor="let dokument of dokumenty"
+            [class.selected]="selectedDokumentId === dokument.id"
+            (click)="selectDokument(dokument)">
+          {{ dokument.typ }} - {{ dokument.data }}
+          <button (click)="viewDokument(dokument, $event)">Podgląd</button>
+        </li>
+      </ul>
+    </div>
+
+    <div *ngIf="currentTab === 'create'">
+      <h2>Tworzenie Dokumentu</h2>
+      <form>
+        <label for="name">Nazwa dokumentu:</label>
+        <input id="name" type="text" />
+
+        <label for="type">Typ dokumentu:</label>
+        <select id="type">
+          <option value="Zakupu">Zakupu</option>
+          <option value="Sprzedaży">Sprzedaży</option>
+        </select>
+
+        <div>
+          <h3>Elementy Dokumentu</h3>
+          <label for="itemName">Nazwa produktu:</label>
+          <input id="itemName" type="text" />
+
+          <label for="itemQuantity">Ilość:</label>
+          <input id="itemQuantity" type="number" />
+        </div>
+
+        <button type="submit">Zapisz</button>
+      </form>
+    </div>
+
+   <div *ngIf="currentTab === 'view'">
+  <h2>Podgląd Dokumentu</h2>
+  <div *ngIf="selectedDokument">
+    <p><strong>Typ:</strong> {{ selectedDokument.typ }}</p>
+    <p><strong>Data:</strong> {{ selectedDokument.data }}</p>
+    <button (click)="setTab('list')">Wróć do listy</button>
+  </div>
+</div>
+  </main>
+</div>
