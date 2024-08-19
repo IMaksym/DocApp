@@ -25,36 +25,34 @@
 
     <div *ngIf="currentTab === 'create'">
       <h2>Tworzenie Dokumentu</h2>
-      <form>
-        <label for="name">Nazwa dokumentu:</label>
-        <input id="name" type="text" />
-
+      <form (ngSubmit)="zapiszDokument()">
         <label for="type">Typ dokumentu:</label>
-        <select id="type">
-          <option value="Zakupu">Zakupu</option>
-          <option value="Sprzedaży">Sprzedaży</option>
+        <select id="type" [(ngModel)]="newDokument.typ" name="type" required>
+          <option value="Zakupu: Faktura zaliczkowa">Faktura zaliczkowa</option>
+          <option value="Zakupu: Paragon">Paragon</option>
+          <option value="Zakupu: Faktura zakupu">Faktura zakupu</option>
+          <option value="Sprzedaży: Faktura sprzedaży z paragonu">Faktura sprzedaży z paragonu</option>
+          <option value="Sprzedaży: Faktura sprzedaży">Faktura sprzedaży</option>
         </select>
 
-        <div>
-          <h3>Elementy Dokumentu</h3>
-          <label for="itemName">Nazwa produktu:</label>
-          <input id="itemName" type="text" />
-
-          <label for="itemQuantity">Ilość:</label>
-          <input id="itemQuantity" type="number" />
-        </div>
-
-        <button type="submit">Zapisz</button>
+        <button (click)="zapiszDokument()" type="button">Zapisz</button>
       </form>
     </div>
 
-   <div *ngIf="currentTab === 'view'">
-  <h2>Podgląd Dokumentu</h2>
-  <div *ngIf="selectedDokument">
-    <p><strong>Typ:</strong> {{ selectedDokument.typ }}</p>
-    <p><strong>Data:</strong> {{ selectedDokument.data }}</p>
-    <button (click)="setTab('list')">Wróć do listy</button>
-  </div>
-</div>
+    <div *ngIf="currentTab === 'view'">
+      <h2>Podgląd Dokumentu</h2>
+      <div *ngIf="selectedDokument">
+        <p><strong>Typ:</strong> {{ selectedDokument.typ }}</p>
+        <p><strong>Data:</strong> {{ selectedDokument.data }}</p>
+        <h3>Elementy Dokumentu</h3>
+        <ul>
+          <li *ngFor="let element of dokumentElements">
+            <p><strong>Nazwa produktu:</strong> {{ element.nazwaProduktu }}</p>
+            <p><strong>Ilość:</strong> {{ element.ilosc }}</p>
+          </li>
+        </ul>
+        <button (click)="setTab('list')">Wróć do listy</button>
+      </div>
+    </div>
   </main>
 </div>

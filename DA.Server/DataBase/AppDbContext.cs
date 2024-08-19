@@ -18,14 +18,14 @@ public class Dokument
 {
     public int Id { get; set; }
     public string Typ { get; set; }
-    public string Data { get; set; }
-    public ICollection<Element> ElementyDokumentow { get; set; } 
+    public DateTime Data { get; set; }
+
 }
 public class Element
 {
     public int Id { get; set; }
     public int DokumentId { get; set; }
-    public string ProduktNazwa { get; set; }
+    public string NazwaProduktu { get; set; }
     public int Ilosc { get; set; }
     public Dokument Dokument { get; set; }
     //public Produkt Produkt { get; set; }
