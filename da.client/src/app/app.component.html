@@ -42,17 +42,27 @@
     <div *ngIf="currentTab === 'view'">
       <h2>Podgląd Dokumentu</h2>
       <div *ngIf="selectedDokument">
-        <p><strong>Typ:</strong> {{ selectedDokument.typ }}</p>
-        <p><strong>Data:</strong> {{ selectedDokument.data }}</p>
-        <h3>Elementy Dokumentu</h3>
+        <h2>Dokument</h2>
+        <p>Typ: {{ selectedDokument.typ }}</p>
+        <p>Data: {{ selectedDokument.data }}</p>
+
+        <div *ngIf="kontrahenci.length > 0">
+          <h3>Kontahenci:</h3>
+          <ul>
+            <li *ngFor="let kontrahent of kontrahenci">
+              {{ kontrahent.nazwa }} ,  {{ kontrahent.adres }} ,  NIP: {{ kontrahent.nip }}
+            </li>
+          </ul>
+        </div>
+
+        <h3>Elements</h3>
         <ul>
           <li *ngFor="let element of dokumentElements">
-            <p><strong>Nazwa produktu:</strong> {{ element.nazwaProduktu }}</p>
-            <p><strong>Ilość:</strong> {{ element.ilosc }}</p>
+            {{ element.nazwaProduktu }} - {{ element.ilosc }} szt.
           </li>
         </ul>
-        <button (click)="setTab('list')">Wróć do listy</button>
       </div>
+
     </div>
   </main>
 </div>

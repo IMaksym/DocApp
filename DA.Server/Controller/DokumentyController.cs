@@ -33,7 +33,6 @@ public class DokumentyController : ControllerBase
         return CreatedAtAction(nameof(GetDokumenty), new { id = newDokument.Id }, newDokument);
     }
 
-
     [HttpGet("{id}/elements")]
     public async Task<ActionResult<IEnumerable<Element>>> GetElementsByDokumentId(int id)
     {
@@ -43,5 +42,28 @@ public class DokumentyController : ControllerBase
 
         return Ok(elements);
     }
+    [HttpGet("{id}/kontrahenci")]
+    public async Task<ActionResult<Kontrahent>> GetKontrahenciByDokumentId(int id)
+    {
+        var kontrahenci = await _context.Kontrahenci
+            .Where(k => _context.Dokumenty.Any(d => d.KontrahentId == k.Id && d.Id == id))
+            .ToListAsync();
+
+        if (kontrahenci == null || !kontrahenci.Any())
+        {
+            return NotFound();
+        }
+
+        return Ok(kontrahenci);
+    }
+
+    [HttpGet("produkty")]
+    public async Task<ActionResult<IEnumerable<Produkt>>> GetProdukty()
+    {
+        var produkty = await _context.Produkty.ToListAsync();
+        return Ok(produkty);
+    }
+
+
 
 }

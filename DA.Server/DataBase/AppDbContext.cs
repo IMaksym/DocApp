@@ -20,6 +20,8 @@ public class Dokument
     public string Typ { get; set; }
     public DateTime Data { get; set; }
 
+    public int? KontrahentId { get; set; }
+    public Kontrahent Kontrahent { get; set; }
 }
 public class Element
 {
@@ -35,6 +37,9 @@ public class Kontrahent
 {
     public int Id { get; set; }
     public string Nazwa { get; set; }
+    public string Adres { get; set; }
+    public string NIP { get; set; }
+    public ICollection<Dokument> Dokumenty { get; set; } = new List<Dokument>();
 }
 
 public class Produkt

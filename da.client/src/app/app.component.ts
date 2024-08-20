@@ -14,6 +14,13 @@ interface Element {
   ilosc: number;
 }
 
+interface Kontrahent {
+  id: number;
+  nazwa: string;
+  adres: string;
+  nip: string;
+}
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -25,6 +32,7 @@ export class AppComponent implements OnInit {
   selectedDokumentId: number | null = null;
   selectedDokument: Dokument | null = null;
   dokumentElements: Element[] = [];
+  kontrahenci: Kontrahent[] = []; 
   newDokument: Dokument = { id: 0, typ: '', data: new Date().toISOString().slice(0, 10) };
 
   private apiUrl = 'https://localhost:5001/api';
@@ -57,8 +65,10 @@ export class AppComponent implements OnInit {
 
   viewDokument(dokument: Dokument, event: Event): void {
     event.stopPropagation();
+    this.selectedDokumentId = dokument.id;
     this.selectedDokument = dokument;
-    this.getDokumentElements(dokument.id);  // Fetch elements for the selected document
+    this.getDokumentElements(dokument.id);  
+    this.getKontrahenciByDokumentId(dokument.id);  
     this.setTab('view');
   }
 
@@ -68,6 +78,15 @@ export class AppComponent implements OnInit {
         this.dokumentElements = data;
       }, error => {
         console.error('Error fetching dokument elements:', error);
+      });
+  }
+
+  getKontrahenciByDokumentId(dokumentId: number): void {
+    this.http.get<Kontrahent[]>(`${this.apiUrl}/dokumenty/${dokumentId}/kontrahenci`)
+      .subscribe(data => {
+        this.kontrahenci = data; 
+      }, error => {
+        console.error('Error fetching kontrahenci:', error);
       });
   }
 
