@@ -38,12 +38,20 @@
     <h3>Kontrahent</h3>
     <label for="nazwa">Nazwa:</label>
     <input id="nazwa" [(ngModel)]="newKontrahent.nazwa" name="nazwa" required>
-    
+
     <label for="adres">Adres:</label>
     <input id="adres" [(ngModel)]="newKontrahent.adres" name="adres" required>
 
     <label for="nip">NIP:</label>
     <input id="nip" [(ngModel)]="newKontrahent.nip" name="nip" required>
+
+    <label for="product">Produkt:</label>
+    <select id="product" [(ngModel)]="selectedProductId" name="product" required>
+      <option *ngFor="let produkt of produkty" [value]="produkt.id">
+        {{ produkt.nazwa }}
+      </option>
+    </select>
+
 
     <button type="submit">Zapisz</button>
   </form>

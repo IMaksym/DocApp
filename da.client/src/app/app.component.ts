@@ -20,6 +20,7 @@ interface Kontrahent {
   adres: string;
   nip: string;
 }
+
 interface Produkt {
   id: number;
   nazwa: string;
@@ -36,11 +37,11 @@ export class AppComponent implements OnInit {
   selectedDokumentId: number | null = null;
   selectedDokument: Dokument | null = null;
   dokumentElements: Element[] = [];
-  kontrahenci: Kontrahent[] = []; 
+  kontrahenci: Kontrahent[] = [];
   newDokument: Dokument = { id: 0, typ: '', data: new Date().toISOString().slice(0, 10) };
   newKontrahent: Kontrahent = { nazwa: '', adres: '', nip: '' };
   produkty: Produkt[] = [];
-
+  selectedProductId: number | null = null;
 
   private apiUrl = 'https://localhost:5001/api';
 
@@ -48,6 +49,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.getDokumenty();
+    this.getProdukty();
   }
 
   setTab(tab: string): void {
@@ -56,13 +58,28 @@ export class AppComponent implements OnInit {
 
   getDokumenty(): void {
     this.http.get<Dokument[]>(`${this.apiUrl}/dokumenty`)
-      .subscribe(data => {
-        this.dokumenty = data.map(dokument => ({
-          ...dokument,
-          data: this.formatDateWithoutTime(dokument.data)
-        }));
-      }, error => {
-        console.error('Error fetching dokumenty:', error);
+      .subscribe({
+        next: data => {
+          this.dokumenty = data.map(dokument => ({
+            ...dokument,
+            data: this.formatDateWithoutTime(dokument.data)
+          }));
+        },
+        error: error => {
+          console.error('Error fetching dokumenty:', error);
+        }
+      });
+  }
+
+  getProdukty(): void {
+    this.http.get<Produkt[]>(`${this.apiUrl}/dokumenty/produkty`)
+      .subscribe({
+        next: data => {
+          this.produkty = data;
+        },
+        error: error => {
+          console.error('Error fetching produkty:', error);
+        }
       });
   }
 
@@ -74,26 +91,32 @@ export class AppComponent implements OnInit {
     event.stopPropagation();
     this.selectedDokumentId = dokument.id;
     this.selectedDokument = dokument;
-    this.getDokumentElements(dokument.id);  
-    this.getKontrahenciByDokumentId(dokument.id);  
+    this.getDokumentElements(dokument.id);
+    this.getKontrahenciByDokumentId(dokument.id);
     this.setTab('view');
   }
 
   getDokumentElements(dokumentId: number): void {
     this.http.get<Element[]>(`${this.apiUrl}/dokumenty/${dokumentId}/elements`)
-      .subscribe(data => {
-        this.dokumentElements = data;
-      }, error => {
-        console.error('Error fetching dokument elements:', error);
+      .subscribe({
+        next: data => {
+          this.dokumentElements = data;
+        },
+        error: error => {
+          console.error('Error fetching dokument elements:', error);
+        }
       });
   }
 
   getKontrahenciByDokumentId(dokumentId: number): void {
     this.http.get<Kontrahent[]>(`${this.apiUrl}/dokumenty/${dokumentId}/kontrahenci`)
-      .subscribe(data => {
-        this.kontrahenci = data; 
-      }, error => {
-        console.error('Error fetching kontrahenci:', error);
+      .subscribe({
+        next: data => {
+          this.kontrahenci = data;
+        },
+        error: error => {
+          console.error('Error fetching kontrahenci:', error);
+        }
       });
   }
 
@@ -101,7 +124,7 @@ export class AppComponent implements OnInit {
     const nowyDokument = {
       typ: this.newDokument.typ,
       data: this.formatDateWithoutTime(this.newDokument.data),
-      kontrahent: this.newKontrahent 
+      kontrahent: this.newKontrahent
     };
 
     this.http.post<Dokument>(`${this.apiUrl}/dokumenty/create`, nowyDokument)

@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -17,39 +15,22 @@ public class DokumentyController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Dokument>>> GetDokumenty()
     {
-        return await _context.Dokumenty
-            .ToListAsync();
+        return await _context.Dokumenty.ToListAsync();
     }
-    [HttpPost]
-    public async Task<IActionResult> PostDokument([FromBody] Dokument newDokument)
-    {
-        _context.Dokumenty.Add(newDokument);
-        await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetDokumenty), new { id = newDokument.Id }, newDokument);
-    }
-
-
 
     [HttpPost("create")]
     public async Task<IActionResult> CreateDokument([FromBody] Dokument newDokument)
     {
-        var options = new JsonSerializerOptions
-        {
-            ReferenceHandler = ReferenceHandler.Preserve,
-            MaxDepth = 64
-        };
-
         _context.Dokumenty.Add(newDokument);
         await _context.SaveChangesAsync();
-
         return CreatedAtAction(nameof(GetDokumenty), new { id = newDokument.Id }, newDokument);
     }
 
-
-
-
-
-
+    [HttpGet("produkty")]
+    public async Task<ActionResult<IEnumerable<Produkt>>> GetProdukty()
+    {
+        return await _context.Produkty.ToListAsync();
+    }
 
     [HttpGet("{id}/elements")]
     public async Task<ActionResult<IEnumerable<Element>>> GetElementsByDokumentId(int id)
@@ -57,25 +38,15 @@ public class DokumentyController : ControllerBase
         var elements = await _context.ElementyDokumentow
             .Where(e => e.DokumentId == id)
             .ToListAsync();
-
         return Ok(elements);
     }
+
     [HttpGet("{id}/kontrahenci")]
-    public async Task<ActionResult<Kontrahent>> GetKontrahenciByDokumentId(int id)
+    public async Task<ActionResult<IEnumerable<Kontrahent>>> GetKontrahenciByDokumentId(int id)
     {
         var kontrahenci = await _context.Kontrahenci
             .Where(k => _context.Dokumenty.Any(d => d.KontrahentId == k.Id && d.Id == id))
             .ToListAsync();
-
-        if (kontrahenci == null || !kontrahenci.Any())
-        {
-            return NotFound();
-        }
-
         return Ok(kontrahenci);
     }
-
-
-
-
 }
