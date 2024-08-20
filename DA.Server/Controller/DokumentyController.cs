@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -25,13 +27,29 @@ public class DokumentyController : ControllerBase
         await _context.SaveChangesAsync();
         return CreatedAtAction(nameof(GetDokumenty), new { id = newDokument.Id }, newDokument);
     }
+
+
+
     [HttpPost("create")]
     public async Task<IActionResult> CreateDokument([FromBody] Dokument newDokument)
     {
+        var options = new JsonSerializerOptions
+        {
+            ReferenceHandler = ReferenceHandler.Preserve,
+            MaxDepth = 64
+        };
+
         _context.Dokumenty.Add(newDokument);
         await _context.SaveChangesAsync();
+
         return CreatedAtAction(nameof(GetDokumenty), new { id = newDokument.Id }, newDokument);
     }
+
+
+
+
+
+
 
     [HttpGet("{id}/elements")]
     public async Task<ActionResult<IEnumerable<Element>>> GetElementsByDokumentId(int id)
@@ -57,12 +75,6 @@ public class DokumentyController : ControllerBase
         return Ok(kontrahenci);
     }
 
-    [HttpGet("produkty")]
-    public async Task<ActionResult<IEnumerable<Produkt>>> GetProdukty()
-    {
-        var produkty = await _context.Produkty.ToListAsync();
-        return Ok(produkty);
-    }
 
 
 

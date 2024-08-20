@@ -15,10 +15,14 @@ interface Element {
 }
 
 interface Kontrahent {
-  id: number;
+  id?: number;
   nazwa: string;
   adres: string;
   nip: string;
+}
+interface Produkt {
+  id: number;
+  nazwa: string;
 }
 
 @Component({
@@ -34,6 +38,9 @@ export class AppComponent implements OnInit {
   dokumentElements: Element[] = [];
   kontrahenci: Kontrahent[] = []; 
   newDokument: Dokument = { id: 0, typ: '', data: new Date().toISOString().slice(0, 10) };
+  newKontrahent: Kontrahent = { nazwa: '', adres: '', nip: '' };
+  produkty: Produkt[] = [];
+
 
   private apiUrl = 'https://localhost:5001/api';
 
@@ -93,10 +100,11 @@ export class AppComponent implements OnInit {
   zapiszDokument() {
     const nowyDokument = {
       typ: this.newDokument.typ,
-      data: this.formatDateWithoutTime(this.newDokument.data)
+      data: this.formatDateWithoutTime(this.newDokument.data),
+      kontrahent: this.newKontrahent 
     };
 
-    this.http.post<Dokument>(`${this.apiUrl}/dokumenty`, nowyDokument)
+    this.http.post<Dokument>(`${this.apiUrl}/dokumenty/create`, nowyDokument)
       .subscribe({
         next: response => {
           console.log('Dokument saved successfully', response);
