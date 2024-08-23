@@ -23,39 +23,39 @@
       </ul>
     </div>
 
-  <div *ngIf="currentTab === 'create'">
-  <h2>Tworzenie Dokumentu</h2>
-  <form (ngSubmit)="zapiszDokument()">
-    <label for="type">Typ dokumentu:</label>
-    <select id="type" [(ngModel)]="newDokument.typ" name="type" required>
-      <option value="Zakupu: Faktura zaliczkowa">Faktura zaliczkowa</option>
-      <option value="Zakupu: Paragon">Paragon</option>
-      <option value="Zakupu: Faktura zakupu">Faktura zakupu</option>
-      <option value="Sprzedaży: Faktura sprzedaży z paragonu">Faktura sprzedaży z paragonu</option>
-      <option value="Sprzedaży: Faktura sprzedaży">Faktura sprzedaży</option>
-    </select>
+    <div *ngIf="currentTab === 'create'">
+      <h2>Tworzenie Dokumentu</h2>
+      <form (ngSubmit)="zapiszDokument()">
+        <label for="type">Typ dokumentu:</label>
+        <select id="type" [(ngModel)]="newDokument.typ" name="type" required>
+          <option value="Zakupu: Faktura zaliczkowa">Faktura zaliczkowa</option>
+          <option value="Zakupu: Paragon">Paragon</option>
+          <option value="Zakupu: Faktura zakupu">Faktura zakupu</option>
+          <option value="Sprzedaży: Faktura sprzedaży z paragonu">Faktura sprzedaży z paragonu</option>
+          <option value="Sprzedaży: Faktura sprzedaży">Faktura sprzedaży</option>
+        </select>
 
-    <h3>Kontrahent</h3>
-    <label for="nazwa">Nazwa:</label>
-    <input id="nazwa" [(ngModel)]="newKontrahent.nazwa" name="nazwa" required>
+        <h3>Kontrahent</h3>
+        <label for="nazwa">Nazwa:</label>
+        <input id="nazwa" [(ngModel)]="newKontrahent.nazwa" name="nazwa" required>
 
-    <label for="adres">Adres:</label>
-    <input id="adres" [(ngModel)]="newKontrahent.adres" name="adres" required>
+        <label for="adres">Adres:</label>
+        <input id="adres" [(ngModel)]="newKontrahent.adres" name="adres" required>
 
-    <label for="nip">NIP:</label>
-    <input id="nip" [(ngModel)]="newKontrahent.nip" name="nip" required>
+        <label for="nip">NIP:</label>
+        <input id="nip" [(ngModel)]="newKontrahent.nip" name="nip" required>
 
-    <label for="product">Produkt:</label>
-    <select id="product" [(ngModel)]="selectedProductId" name="product" required>
-      <option *ngFor="let produkt of produkty" [value]="produkt.id">
-        {{ produkt.nazwa }}
-      </option>
-    </select>
+        <label for="product">Produkt:</label>
+        <select id="product" [(ngModel)]="selectedProductId" name="product" required>
+          <option *ngFor="let produkt of produkty" [value]="produkt.id">
+            {{ produkt.nazwa }}
+          </option>
+        </select>
 
 
-    <button type="submit">Zapisz</button>
-  </form>
-</div>
+        <button type="submit">Zapisz</button>
+      </form>
+    </div>
 
 
     <div *ngIf="currentTab === 'view'">

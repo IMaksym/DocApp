@@ -13,6 +13,8 @@ public class AppDbContext : DbContext
     public DbSet<Element> ElementyDokumentow { get; set; }
     public DbSet<Kontrahent> Kontrahenci { get; set; }
     public DbSet<Produkt> Produkty { get; set; }
+
+
 }
 
 public class Dokument

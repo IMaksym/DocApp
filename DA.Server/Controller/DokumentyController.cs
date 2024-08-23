@@ -23,8 +23,21 @@ public class DokumentyController : ControllerBase
     {
         _context.Dokumenty.Add(newDokument);
         await _context.SaveChangesAsync();
+
+        // Добавляем элементы в документ
+        if (newDokument.ElementyDokumentow != null && newDokument.ElementyDokumentow.Any())
+        {
+            foreach (var element in newDokument.ElementyDokumentow)
+            {
+                element.DokumentId = newDokument.Id;
+                _context.ElementyDokumentow.Add(element);
+            }
+            await _context.SaveChangesAsync();
+        }
+
         return CreatedAtAction(nameof(GetDokumenty), new { id = newDokument.Id }, newDokument);
     }
+
 
     [HttpGet("produkty")]
     public async Task<ActionResult<IEnumerable<Produkt>>> GetProdukty()
@@ -49,4 +62,6 @@ public class DokumentyController : ControllerBase
             .ToListAsync();
         return Ok(kontrahenci);
     }
+
+
 }
