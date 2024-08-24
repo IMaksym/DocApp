@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <None Remove="DataBase\DataBase.db" />
+    <None Remove="DataBase\documents.db" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,16 +21,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.SpaProxy">
       <Version>8.*-*</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="8.0.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.7" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="DataBase\DataBase.db">
+    <Resource Include="DataBase\documents.db">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

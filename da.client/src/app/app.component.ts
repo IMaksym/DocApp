@@ -1,29 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-interface Dokument {
-  id: number;
-  typ: string;
-  data: string;
-}
-
-interface Element {
-  id: number;
-  dokumentId: number;
-  nazwaProduktu: string;
-  ilosc: number;
-}
-
 interface Kontrahent {
-  id?: number;
   nazwa: string;
   adres: string;
-  nip: string;
+  telefon: string;
 }
 
 interface Produkt {
   id: number;
   nazwa: string;
+  cena: number;
+}
+
+interface ElementyDokumentow {
+  produktId: number;
+  ilosc: number;
+}
+
+interface DokumentCreateModel {
+  typDokumentu: string;
+  kontrahent: Kontrahent;
+  elementyDokumentow: ElementyDokumentow[];
 }
 
 @Component({
@@ -33,121 +31,115 @@ interface Produkt {
 })
 export class AppComponent implements OnInit {
   currentTab = 'list';
-  dokumenty: Dokument[] = [];
-  selectedDokumentId: number | null = null;
-  selectedDokument: Dokument | null = null;
-  dokumentElements: Element[] = [];
+  dokumenty: any[] = [];
   kontrahenci: Kontrahent[] = [];
-  newDokument: Dokument = { id: 0, typ: '', data: new Date().toISOString().slice(0, 10) };
-  newKontrahent: Kontrahent = { nazwa: '', adres: '', nip: '' };
   produkty: Produkt[] = [];
-  selectedProductId: number | null = null;
+  elementy: ElementyDokumentow[] = [];
+  newDokument: DokumentCreateModel = {
+    typDokumentu: '',
+    kontrahent: {
+      nazwa: '',
+      adres: '',
+      telefon: ''
+    },
+    elementyDokumentow: []
+  };
+  selectedProduktId: number | null = null;
+  ilosc: number = 1;
+  selectedDokument: any = null;
 
-  private apiUrl = 'https://localhost:5001/api';
+  typyDokumentow: string[] = [
+    'Zakupu: Faktura zaliczkowa',
+    'Zakupu: Paragon',
+    'Zakupu: Faktura zakupu',
+    'Sprzedaży: Faktura zaliczkowa',
+    'Sprzedaży: Faktura sprzedaży z paragonu',
+    'Sprzedaży: Faktura sprzedaży'
+  ];
 
   constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
-    this.getDokumenty();
-    this.getProdukty();
+    this.loadDokumenty();
+    this.loadProdukty();
   }
 
-  setTab(tab: string): void {
-    this.currentTab = tab;
-  }
-
-  getDokumenty(): void {
-    this.http.get<Dokument[]>(`${this.apiUrl}/dokumenty`)
-      .subscribe({
-        next: data => {
-          this.dokumenty = data.map(dokument => ({
-            ...dokument,
-            data: this.formatDateWithoutTime(dokument.data)
-          }));
-        },
-        error: error => {
-          console.error('Error fetching dokumenty:', error);
-        }
+  loadDokumenty() {
+    this.http.get<any[]>('https://localhost:5001/api/dokumenty/dokumenty')
+      .subscribe(dokumenty => {
+        this.dokumenty = dokumenty;
+      }, error => {
+        console.error('Błąd podczas pobierania dokumentów', error);
       });
   }
 
-  getProdukty(): void {
-    this.http.get<Produkt[]>(`${this.apiUrl}/dokumenty/produkty`)
-      .subscribe({
-        next: data => {
-          this.produkty = data;
-        },
-        error: error => {
-          console.error('Error fetching produkty:', error);
-        }
+  loadProdukty() {
+    this.http.get<Produkt[]>('https://localhost:5001/api/dokumenty/produkty')
+      .subscribe(produkty => {
+        this.produkty = produkty;
+      }, error => {
+        console.error('Błąd podczas pobierania produktów', error);
       });
   }
 
-  selectDokument(dokument: Dokument): void {
-    this.selectedDokumentId = dokument.id;
-  }
-
-  viewDokument(dokument: Dokument, event: Event): void {
-    event.stopPropagation();
-    this.selectedDokumentId = dokument.id;
+  viewDocument(dokument: any) {
     this.selectedDokument = dokument;
-    this.getDokumentElements(dokument.id);
-    this.getKontrahenciByDokumentId(dokument.id);
-    this.setTab('view');
+    this.selectTab('preview'); // Переключаем вкладку на "Podgląd"
   }
 
-  getDokumentElements(dokumentId: number): void {
-    this.http.get<Element[]>(`${this.apiUrl}/dokumenty/${dokumentId}/elements`)
-      .subscribe({
-        next: data => {
-          this.dokumentElements = data;
-        },
-        error: error => {
-          console.error('Error fetching dokument elements:', error);
-        }
+  createDokument() {
+    if (this.newDokument.typDokumentu.trim() === '') {
+      console.error('TypDokumentu is required');
+      return;
+    }
+
+    if (this.selectedProduktId !== null) {
+      this.newDokument.elementyDokumentow.push({
+        produktId: Number(this.selectedProduktId),
+        ilosc: this.ilosc
+      });
+    }
+
+    // Ensure that elementyDokumentow is not empty
+    if (this.newDokument.elementyDokumentow.length === 0) {
+      console.error('ElementyDokumentow is required');
+      return;
+    }
+
+    console.log('Sending data:', this.newDokument);
+
+    this.http.post('https://localhost:5001/api/dokumenty/dokument', this.newDokument)
+      .subscribe(response => {
+        console.log('Dokument created', response);
+        this.newDokument = {
+          typDokumentu: '',
+          kontrahent: {
+            nazwa: '',
+            adres: '',
+            telefon: ''
+          },
+          elementyDokumentow: []
+        };
+        this.loadDokumenty();
+      }, error => {
+        console.error('Error creating document', error);
       });
   }
 
-  getKontrahenciByDokumentId(dokumentId: number): void {
-    this.http.get<Kontrahent[]>(`${this.apiUrl}/dokumenty/${dokumentId}/kontrahenci`)
-      .subscribe({
-        next: data => {
-          this.kontrahenci = data;
-        },
-        error: error => {
-          console.error('Error fetching kontrahenci:', error);
-        }
+  addElement() {
+    if (this.selectedProduktId !== null && this.ilosc > 0) {
+      this.newDokument.elementyDokumentow.push({
+        produktId: Number(this.selectedProduktId),
+        ilosc: this.ilosc
       });
+      this.selectedProduktId = null; // сброс значения
+      this.ilosc = 1; // сброс значения
+    } else {
+      console.error('Wybierz produkt i ustaw ilość');
+    }
   }
 
-  zapiszDokument() {
-    const nowyDokument = {
-      typ: this.newDokument.typ,
-      data: this.formatDateWithoutTime(this.newDokument.data),
-      kontrahent: this.newKontrahent
-    };
-
-    this.http.post<Dokument>(`${this.apiUrl}/dokumenty/create`, nowyDokument)
-      .subscribe({
-        next: response => {
-          console.log('Dokument saved successfully', response);
-          this.getDokumenty();
-          this.setTab('list');
-        },
-        error: error => {
-          console.error('Error saving dokument:', error);
-          if (error.error) {
-            console.error('Server-side error message:', error.error);
-          }
-        }
-      });
-  }
-
-  formatDateWithoutTime(dateString: string): string {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+  selectTab(tab: string) {
+    this.currentTab = tab;
   }
 }

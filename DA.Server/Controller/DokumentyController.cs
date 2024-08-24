@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DA.Models;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Microsoft.EntityFrameworkCore;
 
 [ApiController]
@@ -12,56 +14,72 @@ public class DokumentyController : ControllerBase
         _context = context;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<Dokument>>> GetDokumenty()
+    [HttpGet("produkty")]
+    public async Task<IActionResult> GetProdukty()
     {
-        return await _context.Dokumenty.ToListAsync();
+        var produkty = await _context.Produkty.ToListAsync();
+        return Ok(produkty);
     }
 
-    [HttpPost("create")]
-    public async Task<IActionResult> CreateDokument([FromBody] Dokument newDokument)
+    [HttpGet("dokumenty")]
+    public async Task<IActionResult> GetDokumenty()
     {
-        _context.Dokumenty.Add(newDokument);
-        await _context.SaveChangesAsync();
+        var dokumenty = await _context.Dokumenty
+            .Include(d => d.Kontrahent)
+            .Include(d => d.ElementyDokumentow)
+            .ThenInclude(ed => ed.Produkt)
+            .ToListAsync();
+        return Ok(dokumenty);
+    }
 
-        // Добавляем элементы в документ
-        if (newDokument.ElementyDokumentow != null && newDokument.ElementyDokumentow.Any())
+    [HttpPost("dokument")]
+    public async Task<IActionResult> CreateDokument([FromBody] CreateDokumentDto createDokumentDto)
+    {
+        if (createDokumentDto == null)
         {
-            foreach (var element in newDokument.ElementyDokumentow)
-            {
-                element.DokumentId = newDokument.Id;
-                _context.ElementyDokumentow.Add(element);
-            }
-            await _context.SaveChangesAsync();
+            return BadRequest("Dokument is null.");
         }
 
-        return CreatedAtAction(nameof(GetDokumenty), new { id = newDokument.Id }, newDokument);
+        // Логирование для отладки
+        Console.WriteLine("Dokument received:");
+        Console.WriteLine(JsonConvert.SerializeObject(createDokumentDto));
+
+        // Создание документа
+        var dokument = new Dokument
+        {
+            TypDokumentu = createDokumentDto.TypDokumentu
+        };
+
+        // Проверка и добавление Kontrahent
+        if (createDokumentDto.Kontrahent != null)
+        {
+            var kontrahent = new Kontrahent
+            {
+                Nazwa = createDokumentDto.Kontrahent.Nazwa,
+                Adres = createDokumentDto.Kontrahent.Adres,
+                Telefon = createDokumentDto.Kontrahent.Telefon
+            };
+            _context.Kontrahenci.Add(kontrahent);
+            await _context.SaveChangesAsync();
+            dokument.KontrahentId = kontrahent.Id;
+        }
+
+        // Добавление элементов документа
+        foreach (var item in createDokumentDto.ElementyDokumentow)
+        {
+            var element = new ElementyDokumentow
+            {
+                ProduktId = item.ProduktId,
+                Ilosc = item.Ilosc,
+                Dokument = dokument
+            };
+            _context.Elementy_dokumentow.Add(element);
+        }
+
+        _context.Dokumenty.Add(dokument);
+        await _context.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(GetDokumenty), new { id = dokument.Id }, dokument);
     }
-
-
-    [HttpGet("produkty")]
-    public async Task<ActionResult<IEnumerable<Produkt>>> GetProdukty()
-    {
-        return await _context.Produkty.ToListAsync();
-    }
-
-    [HttpGet("{id}/elements")]
-    public async Task<ActionResult<IEnumerable<Element>>> GetElementsByDokumentId(int id)
-    {
-        var elements = await _context.ElementyDokumentow
-            .Where(e => e.DokumentId == id)
-            .ToListAsync();
-        return Ok(elements);
-    }
-
-    [HttpGet("{id}/kontrahenci")]
-    public async Task<ActionResult<IEnumerable<Kontrahent>>> GetKontrahenciByDokumentId(int id)
-    {
-        var kontrahenci = await _context.Kontrahenci
-            .Where(k => _context.Dokumenty.Any(d => d.KontrahentId == k.Id && d.Id == id))
-            .ToListAsync();
-        return Ok(kontrahenci);
-    }
-
 
 }

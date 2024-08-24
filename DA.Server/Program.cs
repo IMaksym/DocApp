@@ -1,8 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DA.Models;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+        options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+    });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));

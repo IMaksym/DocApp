@@ -1,87 +1,67 @@
-<div class="container">
-  <header>
-    <h1>Dokumenty</h1>
-    <nav>
-      <ul>
-        <li [ngClass]="{ active: currentTab === 'list' }" (click)="setTab('list')">Lista Dokumentów</li>
-        <li [ngClass]="{ active: currentTab === 'create' }" (click)="setTab('create')">Tworzenie Dokumentu</li>
-        <li [ngClass]="{ active: currentTab === 'view' }" (click)="setTab('view')">Podgląd Dokumentu</li>
-      </ul>
-    </nav>
-  </header>
+<div class="tabs">
+  <button class="tab-button" [class.active]="currentTab === 'list'" (click)="selectTab('list')">Lista dokumentów</button>
+  <button class="tab-button" [class.active]="currentTab === 'create'" (click)="selectTab('create')">Tworzenie dokumentu</button>
+  <button class="tab-button" [class.active]="currentTab === 'preview'" (click)="selectTab('preview')">Podgląd</button>
+</div>
 
-  <main>
-    <div *ngIf="currentTab === 'list'">
-      <h2>Lista Dokumentów</h2>
-      <ul>
-        <li *ngFor="let dokument of dokumenty"
-            [class.selected]="selectedDokumentId === dokument.id"
-            (click)="selectDokument(dokument)">
-          {{ dokument.typ }} - {{ dokument.data }}
-          <button (click)="viewDokument(dokument, $event)">Podgląd</button>
-        </li>
-      </ul>
-    </div>
+<div class="tab-content" *ngIf="currentTab === 'list'">
+  <h2>Lista dokumentów</h2>
+  <div class="document-list" *ngIf="dokumenty.length > 0; else noDocuments">
+    <button class="document-button" *ngFor="let dokument of dokumenty" (click)="viewDocument(dokument)">
+      {{ dokument.typDokumentu }}
+    </button>
+  </div>
+  <ng-template #noDocuments>
+    <p>Brak dokumentów</p>
+  </ng-template>
+</div>
 
-    <div *ngIf="currentTab === 'create'">
-      <h2>Tworzenie Dokumentu</h2>
-      <form (ngSubmit)="zapiszDokument()">
-        <label for="type">Typ dokumentu:</label>
-        <select id="type" [(ngModel)]="newDokument.typ" name="type" required>
-          <option value="Zakupu: Faktura zaliczkowa">Faktura zaliczkowa</option>
-          <option value="Zakupu: Paragon">Paragon</option>
-          <option value="Zakupu: Faktura zakupu">Faktura zakupu</option>
-          <option value="Sprzedaży: Faktura sprzedaży z paragonu">Faktura sprzedaży z paragonu</option>
-          <option value="Sprzedaży: Faktura sprzedaży">Faktura sprzedaży</option>
-        </select>
+<div class="tab-content" *ngIf="currentTab === 'create'">
+  <h2>Tworzenie dokumentu</h2>
+  <form (ngSubmit)="createDokument()">
+    <label for="typDokumentu">Typ dokumentu:</label>
+    <select id="typDokumentu" [(ngModel)]="newDokument.typDokumentu" name="typDokumentu" required
+            style="height: 40px; overflow-y: auto;">
+      <option *ngFor="let typ of typyDokumentow" [value]="typ">{{ typ }}</option>
+    </select>
 
-        <h3>Kontrahent</h3>
-        <label for="nazwa">Nazwa:</label>
-        <input id="nazwa" [(ngModel)]="newKontrahent.nazwa" name="nazwa" required>
+    <label for="kontrahentNazwa">Nazwa kontrahenta:</label>
+    <input type="text" id="kontrahentNazwa" [(ngModel)]="newDokument.kontrahent.nazwa" name="kontrahentNazwa" required />
 
-        <label for="adres">Adres:</label>
-        <input id="adres" [(ngModel)]="newKontrahent.adres" name="adres" required>
+    <label for="kontrahentAdres">Adres kontrahenta:</label>
+    <input type="text" id="kontrahentAdres" [(ngModel)]="newDokument.kontrahent.adres" name="kontrahentAdres" />
 
-        <label for="nip">NIP:</label>
-        <input id="nip" [(ngModel)]="newKontrahent.nip" name="nip" required>
+    <label for="kontrahentTelefon">Telefon kontrahenta:</label>
+    <input type="text" id="kontrahentTelefon" [(ngModel)]="newDokument.kontrahent.telefon" name="kontrahentTelefon" />
 
-        <label for="product">Produkt:</label>
-        <select id="product" [(ngModel)]="selectedProductId" name="product" required>
-          <option *ngFor="let produkt of produkty" [value]="produkt.id">
-            {{ produkt.nazwa }}
-          </option>
-        </select>
+    <label for="produkt">Wybierz produkt:</label>
+    <select id="produkt" [(ngModel)]="selectedProduktId" name="produkt" required>
+      <option *ngFor="let produkt of produkty" [value]="produkt.id">{{ produkt.nazwa }}</option>
+    </select>
 
+    <label for="ilosc">Ilość:</label>
+    <input type="number" id="ilosc" [(ngModel)]="ilosc" name="ilosc" required />
 
-        <button type="submit">Zapisz</button>
-      </form>
-    </div>
+    <button type="button" (click)="addElement()">Dodaj produkt</button>
+    <button type="submit">Utwórz dokument</button>
+  </form>
+</div>
 
-
-    <div *ngIf="currentTab === 'view'">
-      <h2>Podgląd Dokumentu</h2>
-      <div *ngIf="selectedDokument">
-        <h2>Dokument</h2>
-        <p>Typ: {{ selectedDokument.typ }}</p>
-        <p>Data: {{ selectedDokument.data }}</p>
-
-        <div *ngIf="kontrahenci.length > 0">
-          <h3>Kontahenci:</h3>
-          <ul>
-            <li *ngFor="let kontrahent of kontrahenci">
-              {{ kontrahent.nazwa }} ,  {{ kontrahent.adres }} ,  NIP: {{ kontrahent.nip }}
-            </li>
-          </ul>
-        </div>
-
-        <h3>Elementy Documentu</h3>
-        <ul>
-          <li *ngFor="let element of dokumentElements">
-            {{ element.nazwaProduktu }} - {{ element.ilosc }} szt.
-          </li>
-        </ul>
-      </div>
-
-    </div>
-  </main>
+<div class="tab-content" *ngIf="currentTab === 'preview'">
+  <h2>Podgląd</h2>
+  <div *ngIf="selectedDokument">
+    <p><strong>Typ dokumentu:</strong> {{ selectedDokument.typDokumentu }}</p>
+    <p><strong>Nazwa kontrahenta:</strong> {{ selectedDokument.kontrahent.nazwa }}</p>
+    <p><strong>Adres:</strong> {{ selectedDokument.kontrahent.adres }}</p>
+    <p><strong>Telefon:</strong> {{ selectedDokument.kontrahent.telefon }}</p>
+    <h3>Elementy dokumentu:</h3>
+    <ul>
+      <li *ngFor="let item of selectedDokument.elementyDokumentow">
+        Produkt ID: {{ item.produktId }}, Ilość: {{ item.ilosc }}
+      </li>
+    </ul>
+  </div>
+  <div *ngIf="!selectedDokument">
+    <p>Wybierz dokument z listy, aby zobaczyć szczegóły.</p>
+  </div>
 </div>
