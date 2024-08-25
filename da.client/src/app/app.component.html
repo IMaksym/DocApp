@@ -12,7 +12,7 @@
     </button>
   </div>
   <ng-template #noDocuments>
-    <p>Brak dokumentów</p>
+    <p></p>
   </ng-template>
 </div>
 
@@ -20,8 +20,7 @@
   <h2>Tworzenie dokumentu</h2>
   <form (ngSubmit)="createDokument()">
     <label for="typDokumentu">Typ dokumentu:</label>
-    <select id="typDokumentu" [(ngModel)]="newDokument.typDokumentu" name="typDokumentu" required
-            style="height: 40px; overflow-y: auto;">
+    <select id="typDokumentu" [(ngModel)]="newDokument.typDokumentu" name="typDokumentu" required (change)="onTypDokumentuChange($event)">
       <option *ngFor="let typ of typyDokumentow" [value]="typ">{{ typ }}</option>
     </select>
 
@@ -42,8 +41,17 @@
     <label for="ilosc">Ilość:</label>
     <input type="number" id="ilosc" [(ngModel)]="ilosc" name="ilosc" required />
 
-    <button type="button" (click)="addElement()">Dodaj produkt</button>
-    <button type="submit">Utwórz dokument</button>
+    <div *ngIf="showLinkedDocumentField">
+      <label for="linkedDocument">Wybierz dokument powiązany:</label>
+      <select id="linkedDocument" [(ngModel)]="linkedDokumentId" name="linkedDocument" required>
+        <option *ngFor="let dokument of filteredDokumenty" [value]="dokument.id">{{ dokument.typDokumentu }}</option>
+      </select>
+    </div>
+
+    <div class="button-group">
+      <button type="button" (click)="addElement()">Dodaj produkt</button>
+      <button type="submit">Utwórz dokument</button>
+    </div>
   </form>
 </div>
 
@@ -62,6 +70,6 @@
     </ul>
   </div>
   <div *ngIf="!selectedDokument">
-    <p>Wybierz dokument z listy, aby zobaczyć szczegóły.</p>
+    <p>Wybierz dokument z listы, aby zobaczyć szczegóлы.</p>
   </div>
 </div>

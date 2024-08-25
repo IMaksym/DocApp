@@ -26,7 +26,13 @@ namespace DA.Models
 
         [JsonIgnore]
         public virtual ICollection<ElementyDokumentow> ElementyDokumentow { get; set; }
+
+        public int? DokumentPowiazanyId { get; set; }
+
+        [ForeignKey(nameof(DokumentPowiazanyId))]
+        public virtual Dokument DokumentPowiazany { get; set; }
     }
+
 
     public class ElementyDokumentow
     {

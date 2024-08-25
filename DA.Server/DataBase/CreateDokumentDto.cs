@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using DA.Models;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 public class CreateDokumentDto
 {
@@ -10,6 +10,8 @@ public class CreateDokumentDto
 
     [Required]
     public List<ElementyDokumentowDto> ElementyDokumentow { get; set; }
+
+    public int? DokumentPowiazanyId { get; set; }
 }
 
 public class ElementyDokumentowDto
@@ -30,4 +32,3 @@ public class KontrahentDto
 
     public string Telefon { get; set; }
 }
-

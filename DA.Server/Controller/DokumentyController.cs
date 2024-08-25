@@ -1,7 +1,8 @@
 ﻿using DA.Models;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -40,17 +41,12 @@ public class DokumentyController : ControllerBase
             return BadRequest("Dokument is null.");
         }
 
-        // Логирование для отладки
-        Console.WriteLine("Dokument received:");
-        Console.WriteLine(JsonConvert.SerializeObject(createDokumentDto));
-
-        // Создание документа
         var dokument = new Dokument
         {
-            TypDokumentu = createDokumentDto.TypDokumentu
+            TypDokumentu = createDokumentDto.TypDokumentu,
+            DokumentPowiazanyId = createDokumentDto.DokumentPowiazanyId
         };
 
-        // Проверка и добавление Kontrahent
         if (createDokumentDto.Kontrahent != null)
         {
             var kontrahent = new Kontrahent
@@ -64,7 +60,6 @@ public class DokumentyController : ControllerBase
             dokument.KontrahentId = kontrahent.Id;
         }
 
-        // Добавление элементов документа
         foreach (var item in createDokumentDto.ElementyDokumentow)
         {
             var element = new ElementyDokumentow
@@ -81,5 +76,4 @@ public class DokumentyController : ControllerBase
 
         return CreatedAtAction(nameof(GetDokumenty), new { id = dokument.Id }, dokument);
     }
-
 }

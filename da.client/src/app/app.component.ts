@@ -22,6 +22,7 @@ interface DokumentCreateModel {
   typDokumentu: string;
   kontrahent: Kontrahent;
   elementyDokumentow: ElementyDokumentow[];
+  dokumentPowiazanyId?: number;
 }
 
 @Component({
@@ -47,6 +48,10 @@ export class AppComponent implements OnInit {
   selectedProduktId: number | null = null;
   ilosc: number = 1;
   selectedDokument: any = null;
+  linkedDokumentId?: number;
+  showLinkedDocumentField: boolean = false;
+
+  filteredDokumenty: any[] = [];
 
   typyDokumentow: string[] = [
     'Zakupu: Faktura zaliczkowa',
@@ -68,8 +73,6 @@ export class AppComponent implements OnInit {
     this.http.get<any[]>('https://localhost:5001/api/dokumenty/dokumenty')
       .subscribe(dokumenty => {
         this.dokumenty = dokumenty;
-      }, error => {
-        console.error('Błąd podczas pobierania dokumentów', error);
       });
   }
 
@@ -77,20 +80,39 @@ export class AppComponent implements OnInit {
     this.http.get<Produkt[]>('https://localhost:5001/api/dokumenty/produkty')
       .subscribe(produkty => {
         this.produkty = produkty;
-      }, error => {
-        console.error('Błąd podczas pobierania produktów', error);
       });
+  }
+
+  filterDokumenty() {
+    this.filteredDokumenty = this.dokumenty.filter(dokument =>
+      dokument.typDokumentu === 'Zakupu: Paragon' && !this.isDokumentLinked(dokument.id)
+    );
+  }
+
+  isDokumentLinked(dokumentId: number): boolean {
+    return this.dokumenty.some(d => d.dokumentPowiazanyId === dokumentId);
+  }
+
+  onTypDokumentuChange(event: any) {
+    const typDokumentu = event.target.value;
+    this.showLinkedDocumentField = typDokumentu === 'Sprzedaży: Faktura sprzedaży z paragonu';
+
+    if (this.showLinkedDocumentField) {
+      this.filterDokumenty();
+    }
   }
 
   viewDocument(dokument: any) {
     this.selectedDokument = dokument;
-    this.selectTab('preview'); // Переключаем вкладку на "Podgląd"
+    this.selectTab('preview');
   }
 
   createDokument() {
-    if (this.newDokument.typDokumentu.trim() === '') {
-      console.error('TypDokumentu is required');
-      return;
+    if (this.newDokument.typDokumentu.trim() === '') return;
+
+    if (this.newDokument.typDokumentu === 'Sprzedaży: Faktura sprzedaży z paragonu') {
+      if (!this.linkedDokumentId) return;
+      this.newDokument.dokumentPowiazanyId = this.linkedDokumentId;
     }
 
     if (this.selectedProduktId !== null) {
@@ -100,17 +122,10 @@ export class AppComponent implements OnInit {
       });
     }
 
-    // Ensure that elementyDokumentow is not empty
-    if (this.newDokument.elementyDokumentow.length === 0) {
-      console.error('ElementyDokumentow is required');
-      return;
-    }
-
-    console.log('Sending data:', this.newDokument);
+    if (this.newDokument.elementyDokumentow.length === 0) return;
 
     this.http.post('https://localhost:5001/api/dokumenty/dokument', this.newDokument)
-      .subscribe(response => {
-        console.log('Dokument created', response);
+      .subscribe(() => {
         this.newDokument = {
           typDokumentu: '',
           kontrahent: {
@@ -121,8 +136,6 @@ export class AppComponent implements OnInit {
           elementyDokumentow: []
         };
         this.loadDokumenty();
-      }, error => {
-        console.error('Error creating document', error);
       });
   }
 
@@ -132,10 +145,8 @@ export class AppComponent implements OnInit {
         produktId: Number(this.selectedProduktId),
         ilosc: this.ilosc
       });
-      this.selectedProduktId = null; // сброс значения
-      this.ilosc = 1; // сброс значения
-    } else {
-      console.error('Wybierz produkt i ustaw ilość');
+      this.selectedProduktId = null;
+      this.ilosc = 1;
     }
   }
 
